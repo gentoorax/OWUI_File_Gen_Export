@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+	  "file_export": {
+	    "command": "python",
+	    "args": [
+		  "-m",
+		  "LLM_Export.tools.file_export_mcp"
+	    ],
+			"env": {
+				"PYTHONPATH": "{YourPATH}"
+			},
+	    "disabled": false,
+	    "autoApprove": []
+	  }
+  },
+  "logLevel": "DEBUG"
+}
