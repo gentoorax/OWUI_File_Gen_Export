@@ -113,6 +113,43 @@ exit
 - ✅ `.*` (Every other file types)
 - ✅ `.zip` and `.7z` (Archives)
 
+
+
+# Example of config :
+
+### In `file_export_mcp.py`:
+
+line 12: ``EXPORT_DIR = r"C:\temp\LLM_Export\output"``
+line 15: ``BASE_URL = "http://192.168.0.60:9003/files"``
+
+
+
+### In `file_export_server.py`:
+
+line 9: ``EXPORT_DIR = r"C:\temp\LLM_Export\output"``
+
+### MCPO config.json:
+```json
+{
+  "mcpServers": {
+    "file_export": {
+      "command": "python",
+      "args": [
+        "-m",
+        "LLM_Export.tools.file_export_mcp"
+      ],
+      "env": {
+        "PYTHONPATH": "C:\\temp"
+      },
+      "disabled": false,
+      "autoApprove": []
+    }
+  },
+  "logLevel": "DEBUG"
+}
+```
+
+
 ---
 
 ## 📎 License
