@@ -4,6 +4,17 @@
 
 This tool allows seamless file generation and export directly from your Open WebUI environment using Python and FastAPI.
 
+## Multi files
+
+https://github.com/user-attachments/assets/41dadef9-7981-4439-bf5f-3b82fcbaff04
+
+
+## Single archive
+
+https://github.com/user-attachments/assets/1e70a977-62f1-498c-895c-7db135ded95b
+
+
+
 ---
 
 ## 📌 How to Use
