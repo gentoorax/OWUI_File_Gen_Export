@@ -1,0 +1,6 @@
+openpyxl
+reportlab
+py7zr
+fastapi
+uvicorn
+python-multipart
