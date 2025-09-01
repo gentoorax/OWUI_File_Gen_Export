@@ -1,4 +1,13 @@
-# LLM_Export - File Export Tool
+# OWUI_File_Gen_Export – Export Files Directly from Open WebUI
+
+A lightweight, MCPO-integrated tool that lets you **generate and export real files** (PDF, Excel, ZIP, etc.) directly from Open WebUI — just like ChatGPT or Claude.
+
+✅ Supports both **Python** and **Docker**  
+✅ Fully configurable  
+✅ Ready for production workflows  
+✅ Open source & MIT licensed
+
+---
 
 🚀 **Create and export files easily from Open WebUI!**
 
@@ -14,94 +23,106 @@ https://github.com/user-attachments/assets/41dadef9-7981-4439-bf5f-3b82fcbaff04
 https://github.com/user-attachments/assets/1e70a977-62f1-498c-895c-7db135ded95b
 
 
+## 🚀 Quick Start
+
+### 🔧 For Python Users
+
+1. Clone the repo:
+   ```bash
+   git clone https://github.com/GlisseManTV/OWUI_File_Gen_Export.git
+   ```
+
+2. Update `YourPATH` and `YourURL` in:
+   - `LLM_Export/tools/file_export_server.py`
+   - `LLM_Export/tools/file_export_mcp.py`
+
+3. Install dependencies:
+   ```bash
+   pip install openpyxl reportlab py7zr fastapi uvicorn python-multipart mcp
+   ```
+
+4. Run the server:
+   ```bat
+   start "File Export Server" python "YourPATH/LLM_Export/tools/file_export_server.py"
+   ```
+
+5. Use it in Open WebUI — your AI can now generate and export files in real time!
 
 ---
 
-## 📌 How to Use
+## 🐳 Docker Support (Recommended)
 
-### 1. Clone or Download the Repository
+All Docker configurations are in the `docker/` folder.
 
-- Clone the Git repository or download and unzip the folder where you want it.
+### 📦 File Export Server (Docker)
 
-### 2. Update Configuration Files
+📁 Path: `docker/file_server/`
 
-You need to modify two files:
+- `Dockerfile.server`
+- `file_server_compose.yaml`
+- `file_export_server.py`
 
-1. `LLM_Export/tools/file_export_server.py`
-2. `LLM_Export/tools/file_export_mcp.py`
+🔧 **Setup:**
+- Update `port` in `file_server_compose.yaml` if needed
+- Set `path to output` to your **absolute host path** (e.g., `/home/user/exports`)
+- Ensure `Dockerfile.server` and `file_export_server.py` are in the **same directory**
 
-Replace the placeholder values:
-
-- `YourPATH` → Your actual project path (e.g., `/home/user/LLM_Export`)
-- `YourURL` → Your server URL (e.g., `http://localhost:8000`)
-- `YourAPIkey` → Your MCPO API key
-
-### 3. Install Required Dependencies
-
-Run the following command to install all required packages:
-
-```bash
-pip install openpyxl reportlab py7zr fastapi uvicorn python-multipart
-```
-
-> ✅ These packages are essential for:
-> - `openpyxl` → Excel file generation
-> - `reportlab` → PDF creation
-> - `py7zr` → 7z archive support
-> - `fastapi` + `uvicorn` → Backend server
-> - `python-multipart` → File upload handling
-
-### 4. Configure MCPO Server
-
-Update your `config.json` with the following snippet:
-
-```json
-{
-  "mcpServers": {
-    "file_export": {
-      "command": "python",
-      "args": [
-        "-m",
-        "LLM_Export.tools.file_export_mcp"
-      ],
-      "env": {
-        "PYTHONPATH": "YourPATH"
-      },
-      "disabled": false,
-      "autoApprove": []
-    }
-  },
-  "logLevel": "DEBUG"
-}
-```
-
-Replace `YourPATH` with the same path used in the Python files.
-
-### 5. Start the Servers
-
-Use this batch script (`start_servers.bat`) to launch both servers:
-
-```bat
-@echo off
-start "MCPO Server" mcpo --host 0.0.0.0 --port 9002 --api-key "YourAPIkey" --config "PathTo\config.json"
-start "File Export Server" python "YourPATH\LLM_Export\tools\file_export_server.py" --> Add this line to your MCPO start script
-exit
-```
-
-> 💡 Replace:
-> - `YourAPIkey` with your actual MCPO API key
-> - `PathTo\config.json` with the correct path
-> - `YourPATH` with your project root path
+> ⚠️ Important: `Dockerfile.server` and `file_export_server.py` must be in the same folder for build to work.
 
 ---
 
-## 🛠️ Troubleshooting
+### 🖥️ MCPO Server (Docker)
 
-- If the file export fails, check:
-  - `PYTHONPATH` is correctly set
-  - All dependencies are installed
-  - The server ports are not blocked
-  - The `config.json` file is valid JSON
+📁 Path: `docker/mcpo/`
+
+- `Dockerfile`
+- `requirements.txt`
+- `config.json`
+- `MCPO_server_compose.yaml`
+
+🔧 **Setup:**
+- Update `path to installation folder` and `path to output` in `MCPO_server_compose.yaml`
+- `path to output` must match the one in `file_server_compose.yaml`
+- Set `rootPath` to the **exact root folder** where you’ll place the `LLM_Export` folder
+
+> ⚠️ Important: `Dockerfile` and `requirements.txt` must be in the same directory for the image to build.
+
+---
+
+## 🛠️ Build & Run
+
+```yaml
+# Build and run
+services:
+  mcpo:
+    build: .
+    ports:
+      - 8000:8000
+    volumes:
+      - /mnt/Nvme_Apps/Ollama_Models:/rootPath
+      - /mnt/Nvme_Apps/Ollama_Models/LLM_Export/output:/output
+    command: |
+      mcpo --api-key top-secret --config /rootPath/config.json
+networks: {}
+```
+```yaml
+# Build and run
+services:
+  file_export_server:
+    build:
+      context: .
+      dockerfile: dockerfile.server
+    container_name: file_export_server
+    environment:
+      - EXPORT_DIR=/data/output
+    volumes:
+      - /mnt/Nvme_Apps/Ollama_Models/LLM_Export/output:/data/output
+    ports:
+      - 9003:9003
+networks: {}
+```
+
+> ✅ Always rebuild the MCPO image when adding new dependencies.
 
 ---
 
@@ -110,55 +131,62 @@ exit
 - ✅ `.xlsx` (Excel)
 - ✅ `.pdf` (PDF)
 - ✅ `.csv` (CSV)
-- ✅ `.*` (Every other file types)
 - ✅ `.zip` and `.7z` (Archives)
+- ✅ Any other file type (via `.*`)
+
+---
+
+## 📂 Project Structure
 
 
-
-# Example of config :
-
-### In `file_export_mcp.py`:
-
-line 12: ``EXPORT_DIR = r"C:\temp\LLM_Export\output"``
-line 15: ``BASE_URL = "http://192.168.0.60:9003/files"``
-
-
-
-### In `file_export_server.py`:
-
-line 9: ``EXPORT_DIR = r"C:\temp\LLM_Export\output"``
-
-### MCPO config.json:
-```json
-{
-  "mcpServers": {
-    "file_export": {
-      "command": "python",
-      "args": [
-        "-m",
-        "LLM_Export.tools.file_export_mcp"
-      ],
-      "env": {
-        "PYTHONPATH": "C:\\temp"
-      },
-      "disabled": false,
-      "autoApprove": []
-    }
-  },
-  "logLevel": "DEBUG"
-}
-```
+OWUI_File_Gen_Export/
+├── LLM_Export/
+│   ├── tools/
+│   │   ├── file_export_server.py
+│   │   └── file_export_mcp.py
+│   └── ...
+├── docker/
+│   ├── file_server/
+│   │   ├── Dockerfile.server
+│   │   ├── file_server_compose.yaml
+│   │   └── file_export_server.py
+│   └── mcpo/
+│   │   ├── Dockerfile
+│   │   ├── requirements.txt
+│   │   ├── config.json
+│   │   └── MCPO_server_compose.yaml
+│   └──tools/
+│        └── file_export_mcp.py
+└── README.md
 
 
 ---
 
-## 📎 License
+## 📌 Notes
+
+- File output paths must match between `file_server` and `MCPO`
+- Use `docker-compose down` to stop services
+- Always use **absolute paths** for volume mounts
+
+---
+
+## 🔗 Try It Now
+
+👉 [GitHub Repository](https://github.com/GlisseManTV/OWUI_File_Gen_Export)
+
+---
+
+## 🌟 Why This Matters
+
+This tool turns Open WebUI into a **true productivity engine** — where AI doesn’t just chat, but **delivers usable, downloadable files**.
+
+---
+
+## 📄 License
 
 MIT License – Feel free to use, modify, and distribute.
 
 ---
 
-📬 **Need help?** Open an issue or a discussion on the GitHub repository! 
-
----
+📬 **Need help?** Open an issue or start a discussion on GitHub!
 
