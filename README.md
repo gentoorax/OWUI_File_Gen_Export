@@ -132,13 +132,13 @@ networks: {}
 - ✅ `.pdf` (PDF)
 - ✅ `.csv` (CSV)
 - ✅ `.zip` and `.7z` (Archives)
-- ✅ Any other file type (via `.*`)
+- ✅ Any other file type 
 
 ---
 
 ## 📂 Project Structure
 
-
+```
 OWUI_File_Gen_Export/
 ├── LLM_Export/
 │   ├── tools/
@@ -158,7 +158,7 @@ OWUI_File_Gen_Export/
 │   └──tools/
 │        └── file_export_mcp.py
 └── README.md
-
+```
 
 ---
 
