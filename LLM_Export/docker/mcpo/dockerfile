@@ -1,12 +1,10 @@
 FROM ghcr.io/open-webui/mcpo:main
 
 COPY requirements.txt /tmp/requirements.txt
-
 RUN pip install --no-cache-dir -r /tmp/requirements.txt
 
 RUN mkdir -p /rootPath
 COPY config.json /rootPath
-COPY tools /rootPath
+COPY tools /rootPath/tools
 
-ENTRYPOINT ["mcpo"]
-CMD ["--type","http","--host","0.0.0.0","--port","8000","--config","/rootPath/config.json"]
+CMD mcpo --type http --host 0.0.0.0 --port 8000 --config /rootPath/config.json --api-key ${MCPO_API_KEY:-top-secret}
