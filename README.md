@@ -4,6 +4,17 @@
 
 This tool allows seamless file generation and export directly from your Open WebUI environment using Python and FastAPI.
 
+## Multi files
+
+https://github.com/user-attachments/assets/41dadef9-7981-4439-bf5f-3b82fcbaff04
+
+
+## Single archive
+
+https://github.com/user-attachments/assets/1e70a977-62f1-498c-895c-7db135ded95b
+
+
+
 ---
 
 ## 📌 How to Use
@@ -101,6 +112,43 @@ exit
 - ✅ `.csv` (CSV)
 - ✅ `.*` (Every other file types)
 - ✅ `.zip` and `.7z` (Archives)
+
+
+
+# Example of config :
+
+### In `file_export_mcp.py`:
+
+line 12: ``EXPORT_DIR = r"C:\temp\LLM_Export\output"``
+line 15: ``BASE_URL = "http://192.168.0.60:9003/files"``
+
+
+
+### In `file_export_server.py`:
+
+line 9: ``EXPORT_DIR = r"C:\temp\LLM_Export\output"``
+
+### MCPO config.json:
+```json
+{
+  "mcpServers": {
+    "file_export": {
+      "command": "python",
+      "args": [
+        "-m",
+        "LLM_Export.tools.file_export_mcp"
+      ],
+      "env": {
+        "PYTHONPATH": "C:\\temp"
+      },
+      "disabled": false,
+      "autoApprove": []
+    }
+  },
+  "logLevel": "DEBUG"
+}
+```
+
 
 ---
 
