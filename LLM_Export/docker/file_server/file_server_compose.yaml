@@ -7,7 +7,7 @@ services:
     environment:
       - EXPORT_DIR=/data/output
     volumes:
-      - path to output:/data/output
+      - [path to output]:/data/output
     ports:
       - 9003:9003
 networks: {}

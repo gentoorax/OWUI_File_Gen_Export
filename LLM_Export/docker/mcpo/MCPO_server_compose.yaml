@@ -4,7 +4,7 @@ services:
     ports:
       - mcpo 
     volumes:
-      - [rootPath where you put Installation Folder]:/rootPath
+      - [Path where you put "LLM_Export" Folder]:/rootPath
       - [path to output]:/output
     command: |
       mcpo --api-key top-secret --config /rootPath/config.json
