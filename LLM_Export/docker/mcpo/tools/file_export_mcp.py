@@ -1,4 +1,5 @@
 import os
+import logging
 import uuid
 import datetime
 import zipfile
@@ -16,7 +17,22 @@ os.makedirs(EXPORT_DIR, exist_ok=True)
 # Read the file server base URL from environment (fallback to local default).
 # Example to set in k8s:
 #   FILE_EXPORT_BASE_URL=http://file-export-server.ai-system.svc.cluster.local:9003/files
-BASE_URL = os.getenv("FILE_EXPORT_BASE_URL", "http://localhost:9003/files").rstrip("/")
+BASE_URL_ENV = os.getenv("FILE_EXPORT_BASE_URL")
+BASE_URL = (BASE_URL_ENV or "http://localhost:9003/files").rstrip("/")
+
+# Basic logger (honours LOG_LEVEL if you set it)
+logging.basicConfig(
+    level=getattr(logging, os.getenv("LOG_LEVEL", "INFO").upper(), logging.INFO),
+    format="%(asctime)s %(levelname)s %(name)s - %(message)s",
+)
+log = logging.getLogger("file_export_mcp")
+
+# Announce effective config on startup
+if BASE_URL_ENV:
+    log.info("FILE_EXPORT_BASE_URL set -> %s", BASE_URL)
+else:
+    log.warning("FILE_EXPORT_BASE_URL not set; using default -> %s", BASE_URL)
+log.info("EXPORT_DIR -> %s", EXPORT_DIR)
 
 mcp = FastMCP("file_export")
 
@@ -162,4 +178,5 @@ def generate_and_archive(files_data: list[dict], archive_format: str = "zip", ar
     return {"url": _public_url(folder_path, archive_filename)}
 
 if __name__ == "__main__":
+    log.info("Starting MCP server: file_export")
     mcp.run()
