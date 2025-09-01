@@ -18,11 +18,11 @@ jobs:
         include:
           - name: file-export-server
             context: LLM_Export/docker/file_server
-            dockerfile: LLM_Export/docker/file_server/Dockerfile.server
+            dockerfile: LLM_Export/docker/file_server/dockerfile.server
             image: ghcr.io/${{ github.repository_owner }}/owui-file-export-server
           - name: mcpo
             context: LLM_Export/docker/mcpo
-            dockerfile: LLM_Export/docker/mcpo/Dockerfile
+            dockerfile: LLM_Export/docker/mcpo/dockerfile
             image: ghcr.io/${{ github.repository_owner }}/owui-mcpo
     steps:
       - uses: actions/checkout@v4
