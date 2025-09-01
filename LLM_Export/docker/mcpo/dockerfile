@@ -3,3 +3,7 @@ FROM ghcr.io/open-webui/mcpo:main
 COPY requirements.txt /tmp/requirements.txt
 
 RUN pip install --no-cache-dir -r /tmp/requirements.txt
+
+RUN mkdir -p /rootPath
+COPY LLM_Export /rootPath
+CMD ["--type","http","--host","0.0.0.0","--port","8000","--config","/rootPath/config.json"]
