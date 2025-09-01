@@ -172,12 +172,12 @@ OWUI_File_Gen_Export/
 │   │   ├── file_server_compose.yaml
 │   │   └── file_export_server.py
 │   └── mcpo/
-│   │   ├── Dockerfile
-│   │   ├── requirements.txt
-│   │   ├── config.json
-│   │   └── MCPO_server_compose.yaml
-│   └──tools/
-│        └── file_export_mcp.py
+│       ├── Dockerfile
+│       ├── requirements.txt
+│       ├── config.json
+│       ├── MCPO_server_compose.yaml
+│       └──tools/
+│           └── file_export_mcp.py
 └── README.md
 ```
 
