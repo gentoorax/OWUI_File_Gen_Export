@@ -87,6 +87,27 @@ All Docker configurations are in the `docker/` folder.
 
 > ⚠️ Important: `Dockerfile` and `requirements.txt` must be in the same directory for the image to build.
 
+### 🔗 Configure `BASE_URL` in `docker/tools/file_export_mcp.py`
+> ⚠️ **Critical Step for Docker Setup**
+
+You **must** update the `BASE_URL` in:
+```
+docker/tools/file_export_mcp.py
+```
+
+📍 Set it to:
+```python
+BASE_URL = "http(s)://file_server_url:port/files"
+```
+
+Example:
+```python
+BASE_URL = "http://localhost:9003/files"
+```
+
+> ✅ This ensures MCPO can correctly reach the file export server.
+> ❌ If not set, file export will fail with a 404 or connection error.
+
 ---
 
 ## 🛠️ Build & Run
@@ -167,12 +188,6 @@ OWUI_File_Gen_Export/
 - File output paths must match between `file_server` and `MCPO`
 - Use `docker-compose down` to stop services
 - Always use **absolute paths** for volume mounts
-
----
-
-## 🔗 Try It Now
-
-👉 [GitHub Repository](https://github.com/GlisseManTV/OWUI_File_Gen_Export)
 
 ---
 
