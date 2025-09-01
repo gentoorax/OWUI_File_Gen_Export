@@ -11,25 +11,20 @@ os.makedirs(EXPORT_DIR, exist_ok=True)
 
 app = FastAPI()
 
-# Route pour servir les fichiers avec téléchargement forcé
 @app.get("/files/{folder_name}/{filename}")
 async def serve_file(folder_name: str, filename: str):
-    # Construire le chemin complet du fichier
     file_path = os.path.join(EXPORT_DIR, folder_name, filename)
 
-    # Vérifier que le fichier existe
     if not os.path.isfile(file_path):
         raise HTTPException(status_code=404, detail="Fichier non trouvé")
 
-    # Forcer le téléchargement (au lieu d'afficher dans le navigateur)
     return FileResponse(
         path=file_path,
         media_type='application/octet-stream',
-        filename=filename,  # Force le nom de fichier téléchargé
+        filename=filename,
         headers={"Content-Disposition": f"attachment; filename={filename}"}
     )
 
-# Montage du dossier static (pour les autres fichiers)
 app.mount("/files", StaticFiles(directory=EXPORT_DIR), name="files")
 
 if __name__ == "__main__":
