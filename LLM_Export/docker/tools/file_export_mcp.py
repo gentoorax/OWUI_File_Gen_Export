@@ -13,7 +13,7 @@ from reportlab.lib.styles import getSampleStyleSheet
 EXPORT_DIR = r"/output"
 os.makedirs(EXPORT_DIR, exist_ok=True)
 
-BASE_URL = "http://192.168.0.100:9003/files"
+BASE_URL = "http://[file_server_url/ip](:port)/files"
 
 mcp = FastMCP("file_export")
 
