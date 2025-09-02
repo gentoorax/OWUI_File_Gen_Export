@@ -1,0 +1,25 @@
+version: "3.9"
+services:
+  file-export-server:
+    image: ghcr.io/GlisseManTV/owui-file-export-server:latest
+    container_name: file-export-server
+    environment:
+      - EXPORT_DIR=/data/output
+    ports:
+      - "9003:9003"
+    volumes:
+      - /your/export-data:/data/output
+
+  owui-mcpo:
+    image: ghcr.io/GlisseManTV/owui-mcpo:latest
+    container_name: owui-mcpo
+    environment:
+      - FILE_EXPORT_BASE_URL=http://file-export-server:9003/files
+      - LOG_LEVEL=DEBUG
+      - MCPO_API_KEY=test
+    ports:
+      - "8000:8000"
+    volumes:
+      - /your/export-data:/output
+    depends_on:
+      - file-export-server
