@@ -12,7 +12,7 @@ import csv
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
 
-
+PERSISTENT_FILES = os.getenv("PERSISTENT_FILES", "false")
 FILES_DELAY = int(os.getenv("FILES_DELAY", 60)) 
 
 EXPORT_DIR_ENV = os.getenv("FILE_EXPORT_DIR")
@@ -70,7 +70,7 @@ def _cleanup_files(folder_path: str, delay_minutes: int):
     thread.start()
 
 @mcp.tool()
-def create_excel(data: list[list[str]], filename: str = None, persistent: bool = True) -> dict:
+def create_excel(data: list[list[str]], filename: str = None, persistent: bool = PERSISTENT_FILES) -> dict:
     folder_path = _generate_unique_folder()
     filepath, fname = _generate_filename(folder_path, "xlsx", filename)
     wb = Workbook()
@@ -85,7 +85,7 @@ def create_excel(data: list[list[str]], filename: str = None, persistent: bool =
     return {"url": _public_url(folder_path, fname)}
 
 @mcp.tool()
-def create_csv(data: list[list[str]], filename: str = None, persistent: bool = True) -> dict:
+def create_csv(data: list[list[str]], filename: str = None, persistent: bool = PERSISTENT_FILES) -> dict:
     folder_path = _generate_unique_folder()
     filepath, fname = _generate_filename(folder_path, "csv", filename)
     with open(filepath, "w", newline="", encoding="utf-8") as f:
@@ -97,7 +97,7 @@ def create_csv(data: list[list[str]], filename: str = None, persistent: bool = T
     return {"url": _public_url(folder_path, fname)}
 
 @mcp.tool()
-def create_pdf(text: list[str], filename: str = None, persistent: bool = True) -> dict:
+def create_pdf(text: list[str], filename: str = None, persistent: bool = PERSISTENT_FILES) -> dict:
     folder_path = _generate_unique_folder()
     filepath, fname = _generate_filename(folder_path, "pdf", filename)
     doc = SimpleDocTemplate(filepath)
@@ -114,7 +114,7 @@ def create_pdf(text: list[str], filename: str = None, persistent: bool = True) -
     return {"url": _public_url(folder_path, fname)}
 
 @mcp.tool()
-def create_file(content: str, filename: str, persistent: bool = True) -> dict:
+def create_file(content: str, filename: str, persistent: bool = PERSISTENT_FILES) -> dict:
     folder_path = _generate_unique_folder()
     base, ext = os.path.splitext(filename)
     filepath = os.path.join(folder_path, filename)
@@ -137,7 +137,7 @@ def create_file(content: str, filename: str, persistent: bool = True) -> dict:
     return {"url": _public_url(folder_path, filename)}
 
 @mcp.tool()
-def generate_and_archive(files_data: list[dict], archive_format: str = "zip", archive_name: str = None, persistent: bool = True) -> dict:
+def generate_and_archive(files_data: list[dict], archive_format: str = "zip", archive_name: str = None, persistent: bool = PERSISTENT_FILES) -> dict:
     folder_path = _generate_unique_folder()
     
     generated_files = []

@@ -7,7 +7,6 @@ import pathlib
 
 EXPORT_DIR_ENV = os.getenv("FILE_EXPORT_DIR")
 EXPORT_DIR = (EXPORT_DIR_ENV or r"/output").rstrip("/")
-
 os.makedirs(EXPORT_DIR, exist_ok=True)
 
 app = FastAPI()
