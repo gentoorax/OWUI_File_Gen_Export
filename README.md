@@ -172,12 +172,12 @@ OWUI_File_Gen_Export/
 │   │   ├── file_server_compose.yaml
 │   │   └── file_export_server.py
 │   └── mcpo/
-│   │   ├── Dockerfile
-│   │   ├── requirements.txt
-│   │   ├── config.json
-│   │   └── MCPO_server_compose.yaml
-│   └──tools/
-│        └── file_export_mcp.py
+│       ├── Dockerfile
+│       ├── requirements.txt
+│       ├── config.json
+│       ├── MCPO_server_compose.yaml
+│       └──tools/
+│           └── file_export_mcp.py
 └── README.md
 ```
 
@@ -188,7 +188,27 @@ OWUI_File_Gen_Export/
 - File output paths must match between `file_server` and `MCPO`
 - Use `docker-compose down` to stop services
 - Always use **absolute paths** for volume mounts
+  
+⚠️Some users are experiencing trouble with the MCPO server, please use this fix⚠️
+```config.json
+{
+  "mcpServers": {
+      "file_export": {
+        "command": "python", <==== HERE change "python" to "python3", "python3.11" or "python3.12"
+        "args": [
+          "-m",
+          "LLM_Export.tools.file_export_mcp"
+        ],
+        "env": {
+          "PYTHONPATH": "YourPATH"
+        },
+        "disabled": false,
+        "autoApprove": []
+      }
+  }
+}
 
+```
 ---
 
 ## 🌟 Why This Matters
