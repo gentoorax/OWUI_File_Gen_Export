@@ -2,7 +2,7 @@ name: Build & Push GHCR images
 
 on:
   push:
-    branches: [ master, main ]
+    branches: [ master, main, bug/fix-directories-in-archive-zip ]  # add your feature branch
     tags: [ 'v*' ]
   workflow_dispatch:
 
@@ -55,9 +55,14 @@ jobs:
         with:
           images: ${{ matrix.image }}
           tags: |
+            # keep latest only on default branch (main/master)
             type=raw,value=latest,enable={{is_default_branch}}
-            type=sha,format=short
+            # tag pushes (e.g. v1.2.3)
             type=ref,event=tag
+            # branch builds get a branch tag (slashes sanitized), not latest
+            type=ref,event=branch,enable={{ !is_default_branch }},prefix=branch-
+            # always add short SHA tag
+            type=sha,format=short
 
       - name: Build & Push (${{ matrix.name }})
         uses: docker/build-push-action@v6
