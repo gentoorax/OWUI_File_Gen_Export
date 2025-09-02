@@ -99,6 +99,9 @@ def generate_and_archive(files_data: list[dict], archive_format: str = "zip", ar
         filename = file_info.get("filename")
         content = file_info.get("content")
         format_type = file_info.get("format")
+
+        if content is None:
+            content = ""
         
         filepath, fname = _generate_filename(folder_path, format_type, filename)
         

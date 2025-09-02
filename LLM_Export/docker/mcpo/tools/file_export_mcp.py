@@ -101,6 +101,7 @@ def create_file(content: str, filename: str) -> dict:
     base, ext = os.path.splitext(filename)
     filepath = os.path.join(folder_path, filename)
     counter = 1
+
     while os.path.exists(filepath):
         filename = f"{base}_{counter}{ext}"
         filepath = os.path.join(folder_path, filename)
@@ -124,7 +125,10 @@ def generate_and_archive(files_data: list[dict], archive_format: str = "zip", ar
         filename = file_info.get("filename")
         content = file_info.get("content")
         format_type = file_info.get("format")
-        
+ 
+        if content is None:
+            content = ""        
+
         filepath, fname = _generate_filename(folder_path, format_type, filename)
         
         if format_type == "py" or format_type == "cs" or format_type == "txt":
