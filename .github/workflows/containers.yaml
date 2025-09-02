@@ -55,14 +55,15 @@ jobs:
         with:
           images: ${{ matrix.image }}
           tags: |
-            # keep latest only on default branch (main/master)
+            # keep latest only on default branch
             type=raw,value=latest,enable={{is_default_branch}}
             # tag pushes (e.g. v1.2.3)
             type=ref,event=tag
-            # branch builds get a branch tag (slashes sanitized), not latest
-            type=ref,event=branch,enable={{ !is_default_branch }},prefix=branch-
+            # branch builds (non-default branches only)
+            type=ref,event=branch,enable={{is_not_default_branch}},prefix=branch-
             # always add short SHA tag
             type=sha,format=short
+
 
       - name: Build & Push (${{ matrix.name }})
         uses: docker/build-push-action@v6
