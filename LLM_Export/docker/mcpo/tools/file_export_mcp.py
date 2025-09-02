@@ -1,9 +1,11 @@
 import os
-import logging
 import uuid
 import datetime
 import zipfile
 import py7zr
+import logging
+import threading
+import time
 from mcp.server.fastmcp import FastMCP
 from openpyxl import Workbook
 import csv
@@ -11,30 +13,25 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
 
 
-EXPORT_DIR = r"/output"
+FILES_DELAY = int(os.getenv("FILES_DELAY", 60)) 
+
+EXPORT_DIR_ENV = os.getenv("FILE_EXPORT_DIR")
+EXPORT_DIR = (EXPORT_DIR_ENV or r"C:\temp\output").rstrip("/")
 os.makedirs(EXPORT_DIR, exist_ok=True)
 
-# Read the file server base URL from environment (fallback to local default).
-# Example to set in k8s:
-#   FILE_EXPORT_BASE_URL=http://file-export-server.ai-system.svc.cluster.local:9003/files
+
 BASE_URL_ENV = os.getenv("FILE_EXPORT_BASE_URL")
 BASE_URL = (BASE_URL_ENV or "http://localhost:9003/files").rstrip("/")
 
-# Basic logger (honours LOG_LEVEL if you set it)
-logging.basicConfig(
-    level=getattr(logging, os.getenv("LOG_LEVEL", "INFO").upper(), logging.INFO),
-    format="%(asctime)s %(levelname)s %(name)s - %(message)s",
-)
-log = logging.getLogger("file_export_mcp")
-
-# Announce effective config on startup
-if BASE_URL_ENV:
-    log.info("FILE_EXPORT_BASE_URL set -> %s", BASE_URL)
-else:
-    log.warning("FILE_EXPORT_BASE_URL not set; using default -> %s", BASE_URL)
-log.info("EXPORT_DIR -> %s", EXPORT_DIR)
 
 mcp = FastMCP("file_export")
+
+
+def _public_url(folder_path: str, filename: str) -> str:
+    """Build a stable public URL for a generated file."""
+    folder = os.path.basename(folder_path).lstrip("/")
+    name = filename.lstrip("/")
+    return f"{BASE_URL}/{folder}/{name}"
 
 def _generate_unique_folder() -> str:
     folder_name = f"export_{uuid.uuid4().hex[:10]}_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}"
@@ -57,14 +54,23 @@ def _generate_filename(folder_path: str, ext: str, filename: str = None) -> tupl
 
     return filepath, filename
 
-def _public_url(folder_path: str, filename: str) -> str:
-    """Build a stable public URL for a generated file."""
-    folder = os.path.basename(folder_path).lstrip("/")
-    name = filename.lstrip("/")
-    return f"{BASE_URL}/{folder}/{name}"
+def _cleanup_files(folder_path: str, delay_minutes: int):
+    """Deletes files in a folder after a specified time."""
+    def delete_files():
+        time.sleep(delay_minutes * 60)
+        try:
+            for root, dirs, files in os.walk(folder_path):
+                for file in files:
+                    os.remove(os.path.join(root, file))
+            os.rmdir(folder_path)
+        except Exception as e:
+            logging.error(f"Error deleting files : {e}")
+
+    thread = threading.Thread(target=delete_files)
+    thread.start()
 
 @mcp.tool()
-def create_excel(data: list[list[str]], filename: str = None) -> dict:
+def create_excel(data: list[list[str]], filename: str = None, persistent: bool = True) -> dict:
     folder_path = _generate_unique_folder()
     filepath, fname = _generate_filename(folder_path, "xlsx", filename)
     wb = Workbook()
@@ -72,18 +78,26 @@ def create_excel(data: list[list[str]], filename: str = None) -> dict:
     for row in data:
         ws.append(row)
     wb.save(filepath)
+    
+    if not persistent:
+        _cleanup_files(folder_path, FILES_DELAY)
+    
     return {"url": _public_url(folder_path, fname)}
 
 @mcp.tool()
-def create_csv(data: list[list[str]], filename: str = None) -> dict:
+def create_csv(data: list[list[str]], filename: str = None, persistent: bool = True) -> dict:
     folder_path = _generate_unique_folder()
     filepath, fname = _generate_filename(folder_path, "csv", filename)
     with open(filepath, "w", newline="", encoding="utf-8") as f:
         csv.writer(f).writerows(data)
+    
+    if not persistent:
+        _cleanup_files(folder_path, FILES_DELAY)
+    
     return {"url": _public_url(folder_path, fname)}
 
 @mcp.tool()
-def create_pdf(text: list[str], filename: str = None) -> dict:
+def create_pdf(text: list[str], filename: str = None, persistent: bool = True) -> dict:
     folder_path = _generate_unique_folder()
     filepath, fname = _generate_filename(folder_path, "pdf", filename)
     doc = SimpleDocTemplate(filepath)
@@ -93,10 +107,14 @@ def create_pdf(text: list[str], filename: str = None) -> dict:
         story.append(Paragraph(t, styles["Normal"]))
         story.append(Spacer(1, 12))
     doc.build(story)
+    
+    if not persistent:
+        _cleanup_files(folder_path, FILES_DELAY)
+    
     return {"url": _public_url(folder_path, fname)}
 
 @mcp.tool()
-def create_file(content: str, filename: str) -> dict:
+def create_file(content: str, filename: str, persistent: bool = True) -> dict:
     folder_path = _generate_unique_folder()
     base, ext = os.path.splitext(filename)
     filepath = os.path.join(folder_path, filename)
@@ -113,10 +131,13 @@ def create_file(content: str, filename: str) -> dict:
     with open(filepath, "w", encoding="utf-8") as f:
         f.write(content)
 
+    if not persistent:
+        _cleanup_files(folder_path, FILES_DELAY)
+    
     return {"url": _public_url(folder_path, filename)}
 
 @mcp.tool()
-def generate_and_archive(files_data: list[dict], archive_format: str = "zip", archive_name: str = None) -> dict:
+def generate_and_archive(files_data: list[dict], archive_format: str = "zip", archive_name: str = None, persistent: bool = True) -> dict:
     folder_path = _generate_unique_folder()
     
     generated_files = []
@@ -179,8 +200,10 @@ def generate_and_archive(files_data: list[dict], archive_format: str = "zip", ar
             for file_path in generated_files:
                 zipf.write(file_path, os.path.basename(file_path))
     
+    if not persistent:
+        _cleanup_files(folder_path, FILES_DELAY)
+        
     return {"url": _public_url(folder_path, archive_filename)}
 
 if __name__ == "__main__":
-    log.info("Starting MCP server: file_export")
     mcp.run()
