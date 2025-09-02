@@ -1,4 +1,3 @@
-# C:\temp\LLM_Export\tools\file_export_server.py
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -6,11 +5,11 @@ import uvicorn
 import os
 import pathlib
 
-EXPORT_DIR = r"{YourPATH}\LLM_Export\output"
+EXPORT_DIR_ENV = os.getenv("FILE_EXPORT_DIR")
+EXPORT_DIR = (EXPORT_DIR_ENV or r"C:\temp\output").rstrip("/")
 os.makedirs(EXPORT_DIR, exist_ok=True)
 
 app = FastAPI()
-
 @app.get("/files/{folder_name}/{filename}")
 async def serve_file(folder_name: str, filename: str):
     file_path = os.path.join(EXPORT_DIR, folder_name, filename)
@@ -19,7 +18,7 @@ async def serve_file(folder_name: str, filename: str):
     return FileResponse(
         path=file_path,
         media_type='application/octet-stream',
-        filename=filename,
+        filename=filename, 
         headers={"Content-Disposition": f"attachment; filename={filename}"}
     )
 

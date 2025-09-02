@@ -32,17 +32,20 @@ https://github.com/user-attachments/assets/1e70a977-62f1-498c-895c-7db135ded95b
    git clone https://github.com/GlisseManTV/OWUI_File_Gen_Export.git
    ```
 
-2. Update `YourPATH` and `YourURL` in:
-   - `LLM_Export/tools/file_export_server.py`
-   - `LLM_Export/tools/file_export_mcp.py`
+2. Update env variables in `config.json`:
+   - `PYTHONPATH`: Path to your `LLM_Export` folder (e.g., `C:\temp\LLM_Export`)
+   - `BASE_URL`: URL of your file export server (e.g., `http://localhost:9003/files`)
+   - `FILE_EXPORT_DIR`: Directory where files will be saved (must match the server's export directory)
+   - `FILES_DELAY`: Delay in seconds to wait before checking for new files
 
 3. Install dependencies:
    ```bash
    pip install openpyxl reportlab py7zr fastapi uvicorn python-multipart mcp
    ```
 
-4. Run the server:
+4. Run the file server:
    ```bat
+   set FILE_EXPORT_DIR=C:\temp\LLM_Export\output
    start "File Export Server" python "YourPATH/LLM_Export/tools/file_export_server.py"
    ```
 
@@ -193,19 +196,21 @@ OWUI_File_Gen_Export/
 ```config.json
 {
   "mcpServers": {
-      "file_export": {
-        "command": "python", <==== HERE change "python" to "python3", "python3.11" or "python3.12"
-        "args": [
-          "-m",
-          "LLM_Export.tools.file_export_mcp"
-        ],
-        "env": {
-          "PYTHONPATH": "YourPATH"
-        },
-        "disabled": false,
-        "autoApprove": []
-      }
-  }
+		"file_export": {
+			"command": "python", <==== HERE change "python" to "python3", "python3.11" or "python3.12"
+			"args": [
+				"-m",
+				"tools.file_export_mcp"
+			],
+			"env": {
+				"PYTHONPATH": "C:\\temp\\LLM_Export",
+				"FILE_EXPORT_BASE_URL": "http://localhost:9003/files",
+				"FILE_EXPORT_DIR": "C:\\temp\\LLM_Export\\output",
+				"FILES_DELAY": "1"
+			},
+			"disabled": false,
+			"autoApprove": []
+		}
 }
 
 ```
