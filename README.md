@@ -129,7 +129,7 @@ services:
       - FILE_EXPORT_BASE_URL=http://192.168.0.100:9003/files
       - FILE_EXPORT_DIR=/output
       - MCPO_API_KEY=top-secret
-	  - PERSISTENT_FILES=True
+      - PERSISTENT_FILES=True
       - FILES_DELAY=1
     ports:
       - 8000:8000
