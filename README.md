@@ -23,7 +23,7 @@ https://github.com/user-attachments/assets/41dadef9-7981-4439-bf5f-3b82fcbaff04
 https://github.com/user-attachments/assets/1e70a977-62f1-498c-895c-7db135ded95b
 
 
-## 🚀 Quick Start
+# 🚀 Quick Start
 
 ### 🔧 For Python Users
 
@@ -33,10 +33,13 @@ https://github.com/user-attachments/assets/1e70a977-62f1-498c-895c-7db135ded95b
    ```
 
 2. Update env variables in `config.json`:
-   - `PYTHONPATH`: Path to your `LLM_Export` folder (e.g., `C:\temp\LLM_Export`)
-   - `BASE_URL`: URL of your file export server (e.g., `http://localhost:9003/files`)
-   - `FILE_EXPORT_DIR`: Directory where files will be saved (must match the server's export directory)
-   - `FILES_DELAY`: Delay in seconds to wait before checking for new files
+  These ones only concerns the MCPO part
+
+   - `PYTHONPATH`: Path to your `LLM_Export` folder (e.g., `C:\temp\LLM_Export`) <==== THIS IS MANDATORY no default value
+   - `FILE_EXPORT_BASE_URL`: URL of your file export server (default is `http://localhost:9003/files`)
+   - `FILE_EXPORT_DIR`: Directory where files will be saved (must match the server's export directory) (default is `PYTHONPATH\output`)
+   - `PERSISTENT_FILES`: Set to `true` to keep files after download, `false` to delete after delay (default is false)
+   - `FILES_DELAY`: Delay in minut to wait before checking for new files (default is 60)
 
 3. Install dependencies:
    ```bash
@@ -53,100 +56,86 @@ https://github.com/user-attachments/assets/1e70a977-62f1-498c-895c-7db135ded95b
 
 ---
 
-## 🐳 Docker Support (Recommended)
+### PYTHON EXAMPLE
+This file only concerns the MCPO part, you need to run the file server separately as shown above
+This is an example of a minimal `config.json` for MCPO to enable file export but you can add other (or to other) MCP servers as needed.
 
-All Docker configurations are in the `docker/` folder.
+```config.json
+{
+  "mcpServers": {
+		"file_export": {
+			"command": "python",
+			"args": [
+				"-m",
+				"tools.file_export_mcp"
+			],
+			"env": {
+				"PYTHONPATH": "C:\\temp\\LLM_Export", <==== HERE set the path to your LLM_Export folder (this one is Mandatory)
+				"FILE_EXPORT_BASE_URL": "http://localhost:9003/files", <==== HERE set the URL of your file export server
+				"FILE_EXPORT_DIR": "C:\\temp\\LLM_Export\\output", <==== HERE set the directory where files will be saved (must match the server's export directory)
+				"PERSISTENT_FILES": "false", <==== HERE set to true to keep files after download, false to delete after delay
+				"FILES_DELAY": "60" <==== HERE set the delay in minut to wait before checking for new files
+			},
+			"disabled": false,
+			"autoApprove": []
+		}
+}
 
-### 📦 File Export Server (Docker)
-
-📁 Path: `docker/file_server/`
-
-- `Dockerfile.server`
-- `file_server_compose.yaml`
-- `file_export_server.py`
-
-🔧 **Setup:**
-- Update `port` in `file_server_compose.yaml` if needed
-- Set `path to output` to your **absolute host path** (e.g., `/home/user/exports`)
-- Ensure `Dockerfile.server` and `file_export_server.py` are in the **same directory**
-
-> ⚠️ Important: `Dockerfile.server` and `file_export_server.py` must be in the same folder for build to work.
+```
 
 ---
 
-### 🖥️ MCPO Server (Docker)
+## 🐳 For Docker User (Recommended)
 
-📁 Path: `docker/mcpo/`
-
-- `Dockerfile`
-- `requirements.txt`
-- `config.json`
-- `MCPO_server_compose.yaml`
-
-🔧 **Setup:**
-- Update `path to installation folder` and `path to output` in `MCPO_server_compose.yaml`
-- `path to output` must match the one in `file_server_compose.yaml`
-- Set `rootPath` to the **exact root folder** where you’ll place the `LLM_Export` folder
-
-> ⚠️ Important: `Dockerfile` and `requirements.txt` must be in the same directory for the image to build.
-
-### 🔗 Configure `BASE_URL` in `docker/tools/file_export_mcp.py`
-> ⚠️ **Critical Step for Docker Setup**
-
-You **must** update the `BASE_URL` in:
+Use 
 ```
-docker/tools/file_export_mcp.py
+docker pull ghcr.io/glissemantv/owui_file_gen_export:dev-latest
 ```
 
-📍 Set it to:
-```python
-BASE_URL = "http(s)://file_server_url:port/files"
-```
+### 🛠️ DOCKER ENV VARIABLES
 
-Example:
-```python
-BASE_URL = "http://localhost:9003/files"
-```
+For OWUI-MCPO
+   - `MCPO_API_KEY`: Your MCPO API key (no default value, not mandatory but advised)
+   - `FILE_EXPORT_BASE_URL`: URL of your file export server (default is `http://localhost:9003/files`)
+   - `FILE_EXPORT_DIR`: Directory where files will be saved (must match the server's export directory) (default is `/output`) path must be mounted as a volume
+   - `PERSISTENT_FILES`: Set to `true` to keep files after download, `false` to delete after delay (default is `false`)
+   - `FILES_DELAY`: Delay in minut to wait before checking for new files (default is 60)
+
+For OWUI-FILE-EXPORT-SERVER
+   - `FILE_EXPORT_DIR`: Directory where files will be saved (must match the MCPO's export directory) (default is `/output`) path must be mounted as a volume
 
 > ✅ This ensures MCPO can correctly reach the file export server.
 > ❌ If not set, file export will fail with a 404 or connection error.
 
 ---
 
-## 🛠️ Build & Run
-
-```yaml
-# Build and run
+### DOCKER EXAMPLE
 services:
-  mcpo:
-    build: .
+  file-export-server:
+    image: ghcr.io/glissemantv/owui-file-export-server:dev-latest
+    container_name: file-export-server
+    environment:
+      - FILE_EXPORT_DIR=/data/output
+    ports:
+      - 9003:9003
+    volumes:
+      - /path/to/your/export/folder:/data/output
+  owui-mcpo:
+    image: ghcr.io/glissemantv/owui-mcpo:dev-latest
+    container_name: owui-mcpo
+    environment:
+      - FILE_EXPORT_BASE_URL=http://192.168.0.100:9003/files
+      - FILE_EXPORT_DIR=/output
+      - MCPO_API_KEY=top-secret
+	  - PERSISTENT_FILES=True
+      - FILES_DELAY=1
     ports:
       - 8000:8000
     volumes:
-      - /mnt/Nvme_Apps/Ollama_Models:/rootPath
-      - /mnt/Nvme_Apps/Ollama_Models/LLM_Export/output:/output
-    command: |
-      mcpo --api-key top-secret --config /rootPath/config.json
+      - /path/to/your/export/folder:/output
+    depends_on:
+      - file-export-server
 networks: {}
-```
-```yaml
-# Build and run
-services:
-  file_export_server:
-    build:
-      context: .
-      dockerfile: dockerfile.server
-    container_name: file_export_server
-    environment:
-      - EXPORT_DIR=/data/output
-    volumes:
-      - /mnt/Nvme_Apps/Ollama_Models/LLM_Export/output:/data/output
-    ports:
-      - 9003:9003
-networks: {}
-```
-
-> ✅ Always rebuild the MCPO image when adding new dependencies.
 
 ---
 
@@ -189,7 +178,6 @@ OWUI_File_Gen_Export/
 ## 📌 Notes
 
 - File output paths must match between `file_server` and `MCPO`
-- Use `docker-compose down` to stop services
 - Always use **absolute paths** for volume mounts
   
 ⚠️Some users are experiencing trouble with the MCPO server, please use this fix⚠️
@@ -203,10 +191,7 @@ OWUI_File_Gen_Export/
 				"tools.file_export_mcp"
 			],
 			"env": {
-				"PYTHONPATH": "C:\\temp\\LLM_Export",
-				"FILE_EXPORT_BASE_URL": "http://localhost:9003/files",
-				"FILE_EXPORT_DIR": "C:\\temp\\LLM_Export\\output",
-				"FILES_DELAY": "1"
+				"PYTHONPATH": "C:\\temp\\LLM_Export" <==== HERE set the path to your LLM_Export folder (this one is Mandatory)
 			},
 			"disabled": false,
 			"autoApprove": []

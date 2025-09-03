@@ -15,8 +15,9 @@ from reportlab.lib.styles import getSampleStyleSheet
 PERSISTENT_FILES = os.getenv("PERSISTENT_FILES", "false")
 FILES_DELAY = int(os.getenv("FILES_DELAY", 60)) 
 
+DEFAULT_PATH_ENV = os.getenv("PYTHONPATH", r"").rstrip("/")
 EXPORT_DIR_ENV = os.getenv("FILE_EXPORT_DIR")
-EXPORT_DIR = (EXPORT_DIR_ENV or r"C:\temp\output").rstrip("/")
+EXPORT_DIR = (EXPORT_DIR_ENV or os.path.join(DEFAULT_PATH_ENV, "output")).rstrip("/")
 os.makedirs(EXPORT_DIR, exist_ok=True)
 
 
