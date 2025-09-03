@@ -1,7 +1,7 @@
 version: "3.9"
 services:
   file-export-server:
-    image: ghcr.io/GlisseManTV/owui-file-export-server:latest
+    image: ghcr.io/glissemantv/owui-file-export-server:latest
     container_name: file-export-server
     environment:
       - EXPORT_DIR=/data/output
@@ -11,7 +11,7 @@ services:
       - /your/export-data:/data/output
 
   owui-mcpo:
-    image: ghcr.io/GlisseManTV/owui-mcpo:latest
+    image: ghcr.io/glissemantv/owui-mcpo:latest
     container_name: owui-mcpo
     environment:
       - FILE_EXPORT_BASE_URL=http://file-export-server:9003/files
