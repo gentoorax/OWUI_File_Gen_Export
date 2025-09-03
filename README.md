@@ -35,7 +35,7 @@ https://github.com/user-attachments/assets/1e70a977-62f1-498c-895c-7db135ded95b
 2. Update env variables in `config.json`:
   These ones only concerns the MCPO part
 
-   - `PYTHONPATH`: Path to your `LLM_Export` folder (e.g., `C:\temp\LLM_Export`) <==== THIS IS MANDATORY no default value
+   - `PYTHONPATH`: Path to your `LLM_Export` folder (e.g., `C:\temp\LLM_Export`) <=== MANDATORY no default value
    - `FILE_EXPORT_BASE_URL`: URL of your file export server (default is `http://localhost:9003/files`)
    - `FILE_EXPORT_DIR`: Directory where files will be saved (must match the server's export directory) (default is `PYTHONPATH\output`)
    - `PERSISTENT_FILES`: Set to `true` to keep files after download, `false` to delete after delay (default is false)
@@ -110,6 +110,8 @@ For OWUI-FILE-EXPORT-SERVER
 ---
 
 ### DOCKER EXAMPLE
+Here is an example of a `docker-compose.yaml` file to run both the file export server and the MCPO server:
+```yaml
 services:
   file-export-server:
     image: ghcr.io/glissemantv/owui-file-export-server:dev-latest
@@ -136,7 +138,7 @@ services:
     depends_on:
       - file-export-server
 networks: {}
-
+```
 ---
 
 ## 📦 Supported File Types
